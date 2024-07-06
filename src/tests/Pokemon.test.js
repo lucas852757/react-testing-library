@@ -1,15 +1,33 @@
 import React from 'react';
-import { screen, render, userEvent } from '@testing-library/react';
+import { screen, render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { Router } from 'react-router';
-import { createBrowserHistory } from 'history';
+import { createBrowserHistory, createMemoryHistory } from 'history';
 import pokemons from '../data';
 import App from '../App';
 import { Pokemon } from '../components';
 
 test('Renders all favorite pokemons', async () => {
-  const { id, name, type, averageWeight, image,
-    moreInfo, foundAt, summary, } = pokemons[0];
-  render(<Pokemon isFavorite showDetailsLink={ false } pokemon={ pokemons[0] } />);
+  const {
+    id,
+    name,
+    type,
+    averageWeight: { value, measurementUnit },
+    image,
+    moreInfo,
+    foundAt,
+    summary,
+  } = pokemons[0];
+
+  const history = createMemoryHistory();
+  render(
+    <Router history={ history }>
+      <App />
+    </Router>,
+  );
+
+  expect(screen.getByRole('link', { name: 'More details' })).toBeInTheDocument();
+  userEvent.click(screen.getByRole('link', { name: 'More details' }));
 
   expect(screen.getByTestId('pokemon-name')).toBeInTheDocument();
   expect(screen.getByTestId('pokemon-type')).toBeInTheDocument();
@@ -17,9 +35,12 @@ test('Renders all favorite pokemons', async () => {
 
   expect(screen.getByText(`${name}`)).toBeInTheDocument();
   expect(screen.getByText(`${type}`)).toBeInTheDocument();
-  
-  expect(screen.getByText(`${averageWeight.value}`)).toBeInTheDocument();
 
+  expect(
+    screen.getByText(`Average weight: ${value} ${measurementUnit}`),
+  ).toBeInTheDocument();
+
+  expect(screen.getByAltText(`${name} sprite`)).toBeInTheDocument();
   // const NINE = 9;
   // const history = createBrowserHistory();
 
@@ -46,5 +67,48 @@ test('Renders all favorite pokemons', async () => {
   // expect(screen.getAllByTestId('pokemon-type')).toHaveLength(NINE);
   // expect(screen.getAllByTestId('pokemon-weight')).toHaveLength(NINE);
 
-  // expect(screen.getAllByRole('link', { name: 'More details' })).toHaveLength(NINE);
+  // expect(screen.getAllByRole('link', { name: 'More details' })).toHaveLength(NINE)
+});
+
+test('', () => {
+  const history = createMemoryHistory();
+  history.push('/');
+  render(
+    <Router history={ history }>
+      <App />
+    </Router>,
+  );
+  expect(screen.getByRole('link', { name: 'More details' })).toBeInTheDocument();
+});
+
+test('', () => {
+  const history = createMemoryHistory();
+  history.push('/');
+  render(
+    <Router history={ history }>
+      <App />
+    </Router>,
+  );
+  expect(screen.getByRole('link', { name: 'More details' })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'More details' })).not.toBeDisabled();
+  userEvent.click(screen.getByRole('link', { name: 'More details' }));
+  expect(screen.getByRole('heading',
+    { name: `${pokemons[0].name} Details` })).toBeInTheDocument();
+
+  expect(screen.getByRole('heading', { name: `${pokemons[0].name} Details` }));
+});
+
+test('', () => {
+  const history = createMemoryHistory();
+
+  console.log(history)
+  render(
+    <Router history={ history }>
+      <App />
+    </Router>,
+  );
+  expect(screen.getByRole('link', { name: 'More details' })).toBeInTheDocument();
+   userEvent.click(screen.getByRole('link', { name: 'More details' }));
+
+  // expect(screen.getByRole('link', { name: 'More details' })).toHaveAttribute('href', 'pokemons/25');
 });
