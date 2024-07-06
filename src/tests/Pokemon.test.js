@@ -2,21 +2,18 @@ import React from 'react';
 import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Router } from 'react-router';
-import { createBrowserHistory, createMemoryHistory } from 'history';
+import { createMemoryHistory } from 'history';
 import pokemons from '../data';
 import App from '../App';
-import { Pokemon } from '../components';
+// import { Pokemon } from '../components';
+
+const MOREDETAILS = 'More details';
 
 test('Renders all favorite pokemons', async () => {
   const {
-    id,
     name,
     type,
     averageWeight: { value, measurementUnit },
-    image,
-    moreInfo,
-    foundAt,
-    summary,
   } = pokemons[0];
 
   const history = createMemoryHistory();
@@ -26,8 +23,10 @@ test('Renders all favorite pokemons', async () => {
     </Router>,
   );
 
-  expect(screen.getByRole('link', { name: 'More details' })).toBeInTheDocument();
-  userEvent.click(screen.getByRole('link', { name: 'More details' }));
+  expect(
+    screen.getByRole('link', { name: MOREDETAILS }),
+  ).toBeInTheDocument();
+  userEvent.click(screen.getByRole('link', { name: MOREDETAILS }));
 
   expect(screen.getByTestId('pokemon-name')).toBeInTheDocument();
   expect(screen.getByTestId('pokemon-type')).toBeInTheDocument();
@@ -39,35 +38,9 @@ test('Renders all favorite pokemons', async () => {
   expect(
     screen.getByText(`Average weight: ${value} ${measurementUnit}`),
   ).toBeInTheDocument();
-
-  expect(screen.getByAltText(`${name} sprite`)).toBeInTheDocument();
-  // const NINE = 9;
-  // const history = createBrowserHistory();
-
-  // render(
-  //   <Router history={ history }>
-  //     <App />
-  //   </Router>,
-  // );
-
-  // pokemons.forEach((pokemon) => {
-  //   const { id, name } = pokemon;
-  //   const route = `/pokemons/${id}`;
-
-  //   history.push(route);
-  //   userEvent.click(screen.getByRole('checkbox'));
-  //   expect(screen.getByRole('checkbox').checked).toBe(true);
-
-  //   history.push('/favorites/');
-
-  //   expect(screen.getByAltText(`${name} sprite`)).toBeInTheDocument();
-  //   expect(screen.getByAltText(`${name} is marked as favorite`));
-  // });
-  // expect(screen.getAllByTestId('pokemon-name')).toHaveLength(NINE);
-  // expect(screen.getAllByTestId('pokemon-type')).toHaveLength(NINE);
-  // expect(screen.getAllByTestId('pokemon-weight')).toHaveLength(NINE);
-
-  // expect(screen.getAllByRole('link', { name: 'More details' })).toHaveLength(NINE)
+  const img = screen.getByAltText(`${name} sprite`);
+  expect(img).toBeInTheDocument();
+  expect(img.src).toContain('https://cdn2.bulbagarden.net/upload/b/b2/Spr_5b_025_m.png');
 });
 
 test('', () => {
@@ -78,10 +51,13 @@ test('', () => {
       <App />
     </Router>,
   );
-  expect(screen.getByRole('link', { name: 'More details' })).toBeInTheDocument();
+  expect(
+    screen.getByRole('link', { name: MOREDETAILS }),
+  ).toBeInTheDocument();
 });
 
-test('', () => {
+test('Testing whether the "More details"link '
+  + 'redirects to the Pokemon page details', () => {
   const history = createMemoryHistory();
   history.push('/');
   render(
@@ -89,26 +65,49 @@ test('', () => {
       <App />
     </Router>,
   );
-  expect(screen.getByRole('link', { name: 'More details' })).toBeInTheDocument();
-  expect(screen.getByRole('link', { name: 'More details' })).not.toBeDisabled();
-  userEvent.click(screen.getByRole('link', { name: 'More details' }));
-  expect(screen.getByRole('heading',
-    { name: `${pokemons[0].name} Details` })).toBeInTheDocument();
+  expect(
+    screen.getByRole('link', { name: MOREDETAILS }),
+  ).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: MOREDETAILS })).not.toBeDisabled();
+  userEvent.click(screen.getByRole('link', { name: MOREDETAILS }));
+  expect(
+    screen.getByRole('heading', { name: `${pokemons[0].name} Details` }),
+  ).toBeInTheDocument();
+});
 
+test('Testing whether the pokemon`s url is shown.', () => {
+  const history = createMemoryHistory();
+  history.push('/');
+  render(
+    <Router history={ history }>
+      <App />
+    </Router>,
+  );
+
+  expect(screen.getByRole('link', { name: MOREDETAILS })).toHaveAttribute(
+    'href',
+    '/pokemons/25',
+  );
+});
+
+test('Testing whether a Pokémon image appears on the Pokémon details page '
+  + 'and whether the Pokémon is marked as a favorite.', () => {
+  const history = createMemoryHistory();
+  history.push('/');
+  render(
+    <Router history={ history }>
+      <App />
+    </Router>,
+  );
+
+  expect(
+    screen.getByRole('link', { name: MOREDETAILS }),
+  ).toBeInTheDocument();
+  userEvent.click(screen.getByRole('link', { name: MOREDETAILS }));
   expect(screen.getByRole('heading', { name: `${pokemons[0].name} Details` }));
-});
-
-test('', () => {
-  const history = createMemoryHistory();
-
-  console.log(history)
-  render(
-    <Router history={ history }>
-      <App />
-    </Router>,
-  );
-  expect(screen.getByRole('link', { name: 'More details' })).toBeInTheDocument();
-   userEvent.click(screen.getByRole('link', { name: 'More details' }));
-
-  // expect(screen.getByRole('link', { name: 'More details' })).toHaveAttribute('href', 'pokemons/25');
+  expect(screen.getByText('Pokémon favoritado?')).toBeInTheDocument();
+  userEvent.click(screen.getByText('Pokémon favoritado?'));
+  const img = screen.getByAltText(`${pokemons[0].name} is marked as favorite`);
+  expect(img).toBeInTheDocument();
+  expect(img.src).toContain('/star-icon.svg');
 });
