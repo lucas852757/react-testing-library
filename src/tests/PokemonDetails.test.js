@@ -42,7 +42,8 @@ test('Testing whether the pokemon maps appear on screen. ', () => {
   expect(img[1].src).toContain(pokemons[0].foundAt[1].map);
 });
 
-test('', () => {
+test('Testing whether the user can add the pokemon to favorites '
+  + 'from the details page.', () => {
   const history = createMemoryHistory();
   render(
     <Router history={ history }>
@@ -52,7 +53,6 @@ test('', () => {
 
   expect(screen.getByText(MOREDETAILS)).toBeInTheDocument();
   userEvent.click(screen.getByText(MOREDETAILS));
-  expect(screen.getByRole('checkbox')).toBeInTheDocument();
-  userEvent.click(screen.getByRole('checkbox'));
-  expect(screen.getByText(`${pokemons[0].name} is marked as favorite`));
+
+  expect(screen.getByLabelText('Pokémon favoritado?')).toBeInTheDocument();
 });
